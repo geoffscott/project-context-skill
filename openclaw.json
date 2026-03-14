@@ -1,0 +1,40 @@
+{
+  "name": "project-context",
+  "description": "Create and manage focused project workspaces with git tracking",
+  "version": "0.1.0",
+  "author": "ananda",
+  "commands": {
+    "project-context": {
+      "handler": "./project-context.sh",
+      "description": "Create and manage projects"
+    }
+  },
+  "triggers": [
+    "start project",
+    "new project",
+    "create project",
+    "open project",
+    "/project-context"
+  ],
+  "permissions": {
+    "filesystem": {
+      "paths": [
+        "~/.openclaw/projects/**"
+      ]
+    },
+    "git": {
+      "required": true
+    },
+    "gh": {
+      "required": false,
+      "fallback": "manual"
+    }
+  },
+  "dependencies": [
+    "git",
+    "bash"
+  ],
+  "optional": [
+    "gh"
+  ]
+}
