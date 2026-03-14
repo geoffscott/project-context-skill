@@ -1,80 +1,107 @@
 # project-context
 
-**Status:** MVP (minimal viable product)
+**Status:** MVP (monorepo edition)
 
 ## What It Does
 
-Creates a focused project workspace for focused work on discrete deliverables. Each project gets:
-- A dedicated folder with git initialization
-- GitHub repo (optional, can be created manually)
-- README with project context/description
-- Clean starting point for files, drafts, iterations, and final outputs
+Creates focused project workspaces for discrete deliverables, all tracked in a single git monorepo at `~/.openclaw/projects/`. Each new project gets:
+- A dedicated folder with README and project description
+- Subdirectories for docs, drafts, and final outputs
+- Automatic commit to the projects monorepo
 
 ## When to Use
 
-- **Starting new work:** Tax return, legal filing, report, case analysis, research project
+- **Starting new work:** Tax return, legal filing, report, case analysis, research project, document collaboration
 - **Organizing around outcomes:** "I need to deliver X by Y date"
 - **Scoping context:** All files for this project in one place, git-tracked
+- **Viewing all projects together:** Everything in one monorepo, easy to search and reference across projects
 
 ## Usage
 
 ### Start a New Project
 ```
-/project-context [project-name] [description]
+project-context create [project-name] "[description]"
 ```
 
 **Example:**
 ```
-/project-context taxes-2026 "Prepare 2026 tax return filing. Need to collect W-2s, 1099s, charitable deductions."
+project-context create divorce-settlement "Work through divorce settlement. Legal docs, spreadsheets, negotiation notes."
 ```
 
 **What happens:**
 1. Creates `~/.openclaw/projects/[project-name]/`
-2. Initializes git repo
-3. Creates README.md with project context
-4. Makes initial commit
-5. Attempts to create private GitHub repo
-6. If GitHub fails, gives you a one-click link to create it manually
+2. Creates README.md with project context
+3. Creates subdirectories: `docs/`, `drafts/`, `final/`
+4. Commits the new project to the monorepo
 
-### List Projects
+### List All Projects
 ```
-/project-context --list
+project-context list
 ```
 
-### Switch Context
-When you mention a project by name in a channel, I treat that project folder as the working directory. Upload files there, reference files from there, save outputs there.
+### View Project Details
+```
+project-context info [project-name]
+```
+
+Shows project path, recent git history, and files.
+
+### Day-to-Day Workflow
+
+When you mention a project by name:
+1. I treat that project folder as the working directory
+2. Upload files to `docs/`, `drafts/`, or `final/`
+3. I commit changes to the monorepo
+4. All projects are visible together in git history
+
+## Structure
+
+```
+~/.openclaw/projects/          # Monorepo root
+├── [project-name-1]/
+│   ├── README.md              # Project description
+│   ├── docs/                  # Raw input files
+│   ├── drafts/                # Working documents
+│   └── final/                 # Completed deliverables
+├── [project-name-2]/
+└── .git/                       # Unified monorepo history
+```
 
 ## What You Need
 
 - OpenClaw agent with file access
-- GitHub account (optional; local git works fine without it)
-- Discord channel per project (recommended for clarity)
+- Git (usually already available)
+- No GitHub account required (local git works fine)
 
 ## Implementation
 
 **Core logic:**
 - Bash script that:
   - Creates project folder hierarchy
-  - Runs `git init`
   - Generates templated README
-  - Commits initial state
-  - Attempts `gh repo create` (GitHub CLI)
-  - Falls back to manual creation link
+  - Commits to the parent monorepo
+  
+**Data location:** `~/.openclaw/projects/` (monorepo)
 
-**No dependencies:** Uses standard tools (git, gh CLI)
+**Dependencies:** Standard tools (bash, git)
 
-**Data location:** `~/.openclaw/projects/[project-name]/`
+## Benefits of Monorepo
+
+- **Single clone** → all projects available
+- **Unified history** → easy to see all work across projects
+- **No per-project overhead** → no GitHub repo creation per project
+- **Easy search** → grep across all projects at once
+- **Simple backup** → one git repo to push/pull
 
 ## Known Limitations
 
-- GitHub repo creation requires `gh` CLI authentication (should already be set up)
-- If GitHub fails, you create the repo manually (takes 30 seconds)
-- No advanced project management (yet) — just folder + git
+- GitHub integration not automatic (can push monorepo manually if needed)
+- Projects share a single git history (but folder structure keeps them logically separate)
 
 ## Future Iterations
 
-- List files in project
 - Auto-commit with context-aware messages
-- Extract text from PDFs, parse Excel/CSV/Word (requires additional skills)
+- Extract text from PDFs, parse Excel/CSV/Word
 - Project status/metadata tracking
 - Archive/cleanup old projects
+- Optional: push monorepo to GitHub for backup

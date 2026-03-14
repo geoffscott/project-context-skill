@@ -8,7 +8,6 @@
 set -e
 
 PROJECTS_DIR="${HOME}/.openclaw/projects"
-GITHUB_USER="geoffscott"
 
 # Colors for output
 RED='\033[0;31m'
@@ -73,19 +72,22 @@ create_project() {
     exit 1
   fi
 
+  # Initialize projects monorepo if needed
+  if [[ ! -d "$PROJECTS_DIR/.git" ]]; then
+    echo -e "${BLUE}Initializing projects monorepo...${NC}"
+    mkdir -p "$PROJECTS_DIR"
+    cd "$PROJECTS_DIR"
+    git init
+    git config user.name "ananda-bot"
+    git config user.email "ananda@growthscience.co"
+  fi
+
   # Create directories
   echo -e "${BLUE}Creating project: ${project_name}${NC}"
   mkdir -p "$project_path"
-  cd "$project_path"
-
-  # Initialize git
-  echo -e "${BLUE}Initializing git repository...${NC}"
-  git init
-  git config user.name "ananda-bot"
-  git config user.email "ananda@growthscience.co"
 
   # Create README with project context
-  cat > README.md <<EOF
+  cat > "${project_path}/README.md" <<EOF
 # ${project_name}
 
 ## Project Context
@@ -110,52 +112,16 @@ ${project_description}
 EOF
 
   # Create initial subdirectories
-  mkdir -p docs drafts final
+  mkdir -p "${project_path}/docs" "${project_path}/drafts" "${project_path}/final"
 
-  # Initial commit
-  echo -e "${BLUE}Creating initial commit...${NC}"
-  git add .
-  git commit -m "chore: initialize project ${project_name}"
+  # Commit to monorepo
+  echo -e "${BLUE}Committing to monorepo...${NC}"
+  cd "$PROJECTS_DIR"
+  git add "${project_name}/"
+  git commit -m "feat: create project ${project_name}"
 
   echo -e "${GREEN}✓ Project created: ${project_path}${NC}"
-  echo ""
-
-  # Try to create GitHub repo
-  create_github_repo "$project_name"
-}
-
-###############################################################################
-# Create GitHub Repo
-###############################################################################
-
-create_github_repo() {
-  local project_name="$1"
-  local repo_name="project-${project_name}"
-
-  echo -e "${BLUE}Attempting to create GitHub repo...${NC}"
-
-  # Check if gh CLI is available
-  if ! command -v gh &> /dev/null; then
-    echo -e "${YELLOW}⚠ GitHub CLI (gh) not available. Skipping GitHub setup.${NC}"
-    return
-  fi
-
-  # Attempt to create the repo
-  if gh repo create "${GITHUB_USER}/${repo_name}" --private --source=. --remote=origin --push 2>&1; then
-    echo -e "${GREEN}✓ GitHub repo created and pushed: https://github.com/${GITHUB_USER}/${repo_name}${NC}"
-  else
-    echo -e "${YELLOW}⚠ Could not auto-create GitHub repo (may need permissions or it might already exist)${NC}"
-    echo ""
-    echo -e "${YELLOW}Manual setup:${NC}"
-    echo "1. Create a new private repo here:"
-    echo "   https://github.com/new?name=${repo_name}&visibility=private&owner=${GITHUB_USER}"
-    echo ""
-    echo "2. Once created, I can push to it with:"
-    echo "   git remote add origin https://github.com/${GITHUB_USER}/${repo_name}.git"
-    echo "   git branch -M main"
-    echo "   git push -u origin main"
-    return 1
-  fi
+  echo -e "${GREEN}✓ Committed to monorepo${NC}"
 }
 
 ###############################################################################
@@ -168,18 +134,20 @@ list_projects() {
     return
   fi
 
-  local projects=($(ls -1 "$PROJECTS_DIR" 2>/dev/null || true))
+  local projects=($(ls -1 "$PROJECTS_DIR" 2>/dev/null | grep -v '^\.' || true))
 
   if [[ ${#projects[@]} -eq 0 ]]; then
     echo "No projects found."
     return
   fi
 
-  echo -e "${BLUE}Projects:${NC}"
+  echo -e "${BLUE}Projects in monorepo:${NC}"
   for project in "${projects[@]}"; do
     local path="${PROJECTS_DIR}/${project}"
-    local commit_count=$(cd "$path" && git rev-list --count HEAD 2>/dev/null || echo "0")
-    printf "  %-30s %s commits\n" "$project" "$commit_count"
+    if [[ -d "$path" && "$project" != ".git" ]]; then
+      local file_count=$(find "$path" -type f ! -path '*/.git/*' 2>/dev/null | wc -l)
+      printf "  %-30s %s files\n" "$project" "$file_count"
+    fi
   done
 }
 
@@ -202,23 +170,19 @@ project_info() {
     exit 1
   fi
 
-  cd "$project_path"
-
   echo -e "${BLUE}Project: ${project_name}${NC}"
   echo "Path: ${project_path}"
   echo ""
 
-  # Git info
-  echo -e "${BLUE}Git Status:${NC}"
-  git log -1 --format="%h %s (%ar)" || echo "  (no commits yet)"
-  echo ""
-  echo -e "${BLUE}Commits:${NC}"
-  git rev-list --count HEAD
+  # Git info (from monorepo)
+  echo -e "${BLUE}Git History (monorepo):${NC}"
+  cd "$PROJECTS_DIR"
+  git log --oneline -- "$project_name/" | head -5 || echo "  (no commits yet)"
   echo ""
 
   # Files
   echo -e "${BLUE}Files:${NC}"
-  find . -type f ! -path './.git/*' | head -20 | sed 's/^\.\//  /'
+  find "$project_path" -type f ! -path '*/.git/*' | head -20 | sed "s|^${PROJECTS_DIR}/||"
 }
 
 ###############################################################################
