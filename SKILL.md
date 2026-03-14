@@ -1,3 +1,21 @@
+---
+name: project-context
+description: >
+  Manage project workspaces in a shared monorepo organized by organizational context
+  (oneeleven, saranam, personal, simny, etc.) with channel-aware working directories.
+  Use when starting new projects, organizing work by context, or switching between
+  project areas in different Discord channels.
+---
+
+---
+name: project-context
+description: >
+  Manage project workspaces in a shared monorepo organized by organizational context
+  (oneeleven, saranam, personal, simny, etc.) with channel-aware working directories.
+  Use when starting new projects, organizing work by context, or switching between
+  project areas in different Discord channels.
+---
+
 # project-context
 
 **Status:** Working directory edition — channel-aware project management
