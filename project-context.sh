@@ -7,7 +7,7 @@
 
 set -e
 
-PROJECTS_DIR="${HOME}/.openclaw/projects"
+PROJECTS_DIR="${HOME}/.openclaw/project-context"
 
 # Colors for output
 RED='\033[0;31m'

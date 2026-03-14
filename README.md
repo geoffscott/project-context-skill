@@ -9,7 +9,7 @@ project-context create taxes-2026 "Prepare 2026 tax return. Upload W-2s, 1099s, 
 ```
 
 This creates:
-- Folder: `~/.openclaw/projects/taxes-2026/`
+- Folder: `~/.openclaw/project-context/taxes-2026/`
 - README with project context
 - Subdirectories: `docs/`, `drafts/`, `final/`
 - Automatic commit to the projects monorepo
@@ -45,7 +45,7 @@ Shows project path, recent git history, and file listing.
 ## Monorepo Structure
 
 ```
-~/.openclaw/projects/              # Single monorepo for all projects
+~/.openclaw/project-context/       # Single monorepo for all projects
 ├── [project-name-1]/
 │   ├── README.md                  # Project description
 │   ├── docs/                      # Raw input files (PDFs, uploads, etc.)
@@ -74,7 +74,7 @@ Shows project path, recent git history, and file listing.
 
 ## Technical Details
 
-**Storage:** `~/.openclaw/projects/` (monorepo root)
+**Storage:** `~/.openclaw/project-context/` (monorepo root)
 
 **Git Config:**
 - User: `ananda-bot`
@@ -118,7 +118,7 @@ To test locally:
 
 Clean up test projects:
 ```bash
-rm -rf ~/.openclaw/projects/test-project/
+rm -rf ~/.openclaw/project-context/test-project/
 ```
 
 (Note: This removes from monorepo; you'd need to commit the deletion to git)

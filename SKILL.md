@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Creates focused project workspaces for discrete deliverables, all tracked in a single git monorepo at `~/.openclaw/projects/`. Each new project gets:
+Creates focused project workspaces for discrete deliverables, all tracked in a single git monorepo at `~/.openclaw/project-context/`. Each new project gets:
 - A dedicated folder with README and project description
 - Subdirectories for docs, drafts, and final outputs
 - Automatic commit to the projects monorepo
@@ -29,7 +29,7 @@ project-context create divorce-settlement "Work through divorce settlement. Lega
 ```
 
 **What happens:**
-1. Creates `~/.openclaw/projects/[project-name]/`
+1. Creates `~/.openclaw/project-context/[project-name]/`
 2. Creates README.md with project context
 3. Creates subdirectories: `docs/`, `drafts/`, `final/`
 4. Commits the new project to the monorepo
@@ -57,7 +57,7 @@ When you mention a project by name:
 ## Structure
 
 ```
-~/.openclaw/projects/          # Monorepo root
+~/.openclaw/project-context/   # Monorepo root
 ├── [project-name-1]/
 │   ├── README.md              # Project description
 │   ├── docs/                  # Raw input files
@@ -81,7 +81,7 @@ When you mention a project by name:
   - Generates templated README
   - Commits to the parent monorepo
   
-**Data location:** `~/.openclaw/projects/` (monorepo)
+**Data location:** `~/.openclaw/project-context/` (monorepo)
 
 **Dependencies:** Standard tools (bash, git)
 
