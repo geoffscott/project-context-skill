@@ -1,0 +1,8 @@
+{
+  "name": "project-context",
+  "description": "Manage project workspaces in a shared monorepo with channel-aware working directories",
+  "version": "0.2.0",
+  "handler": "project-context.sh",
+  "type": "script",
+  "requires": ["bash", "git", "jq"]
+}
