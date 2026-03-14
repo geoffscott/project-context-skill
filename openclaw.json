@@ -1,40 +1,42 @@
 {
   "name": "project-context",
-  "description": "Create and manage focused project workspaces with git tracking",
-  "version": "0.1.0",
+  "description": "Create and manage project workspaces organized by context, with channel-aware working directories",
+  "version": "0.2.0",
   "author": "ananda",
   "commands": {
     "project-context": {
       "handler": "./project-context.sh",
-      "description": "Create and manage projects"
+      "description": "Create and manage projects (cd, pwd, create, list, info)"
     }
   },
   "triggers": [
     "start project",
     "new project",
     "create project",
-    "open project",
+    "project context",
     "/project-context"
   ],
   "permissions": {
     "filesystem": {
       "paths": [
-        "~/.openclaw/projects/**"
+        "~/.openclaw/project-context/**",
+        "~/.openclaw/project-context/.state/**"
       ]
     },
     "git": {
-      "required": true
-    },
-    "gh": {
-      "required": false,
-      "fallback": "manual"
+      "required": true,
+      "operations": [
+        "init",
+        "add",
+        "commit",
+        "log"
+      ]
     }
   },
   "dependencies": [
     "git",
-    "bash"
+    "bash",
+    "jq"
   ],
-  "optional": [
-    "gh"
-  ]
+  "optional": []
 }

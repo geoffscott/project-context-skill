@@ -1,31 +1,60 @@
 # project-context Skill
 
-Create and manage focused project workspaces for discrete deliverables in a unified monorepo.
+Manage project workspaces in a shared monorepo, with channel-aware working directories.
 
 ## Quick Start
 
+**Step 1: Set your working directory** (once per channel)
+```bash
+project-context cd personal/taxes/2025
+```
+
+**Step 2: Create projects** (stays in your working directory)
 ```bash
 project-context create taxes-2026 "Prepare 2026 tax return. Upload W-2s, 1099s, deductions."
 ```
 
 This creates:
-- Folder: `~/.openclaw/project-context/taxes-2026/`
-- README with project context
+- Folder: `~/.openclaw/project-context/personal/taxes/2025/taxes-2026/`
+- README with context
 - Subdirectories: `docs/`, `drafts/`, `final/`
-- Automatic commit to the projects monorepo
+- Automatic commit to monorepo
+- Stays in `personal/taxes/2025/` context for next project
 
 ## Commands
 
-### Create a Project
+### Set Working Directory
 ```bash
-project-context create <name> "<description>"
+project-context cd <path>
 ```
 
-Creates a new project workspace and commits it to the monorepo.
-
-**Example:**
+Sets the working directory for the current Discord channel. Example:
 ```bash
-project-context create divorce-settlement "Work through divorce settlement. Legal docs, spreadsheets, negotiation notes."
+project-context cd personal/taxes/2025
+project-context cd saranam
+project-context cd oneeleven/products
+```
+
+### Show Working Directory
+```bash
+project-context pwd
+```
+
+Shows where you are for the current channel.
+
+### Create a Project
+```bash
+project-context create "<description>"
+```
+
+Creates a project in the current working directory. Example:
+```bash
+project-context create "2026 tax return filing"
+```
+
+**Or create elsewhere** (without changing context):
+```bash
+project-context create saranam/governance "Board governance framework"
 ```
 
 ### List All Projects
@@ -33,48 +62,86 @@ project-context create divorce-settlement "Work through divorce settlement. Lega
 project-context list
 ```
 
-Shows all projects in the monorepo and their file counts.
+Shows all projects in the monorepo.
 
 ### Project Info
 ```bash
-project-context info <name>
+project-context info <path>
 ```
 
-Shows project path, recent git history, and file listing.
-
-## Monorepo Structure
-
-```
-~/.openclaw/project-context/       # Single monorepo for all projects
-├── [project-name-1]/
-│   ├── README.md                  # Project description
-│   ├── docs/                      # Raw input files (PDFs, uploads, etc.)
-│   ├── drafts/                    # Working documents and iterations
-│   └── final/                     # Completed deliverables
-├── [project-name-2]/
-│   └── [similar structure]
-└── .git/                          # Unified monorepo history
+Shows path, git history, and files. Example:
+```bash
+project-context info personal/taxes/2025/taxes-2026
 ```
 
-**Typical workflow:**
-1. Create project with context
-2. Upload raw files to `docs/`
-3. Reference them, create drafts in `drafts/`
-4. Iterate on documents
-5. Move finalized work to `final/`
-6. All changes committed to monorepo
+## Directory Structure
 
-## Why Monorepo?
+```
+~/.openclaw/project-context/                      # Monorepo root
+├── oneeleven/                                    # OneEleven projects
+├── saranam/                                      # Saranam board projects
+├── personal/                                     # Personal projects
+│   ├── taxes/2025/
+│   │   ├── growthscience/      (GS taxes)
+│   │   └── personal/           (Personal taxes)
+│   └── [other personal projects]/
+├── simny/                                        # SIMNY projects
+│   └── taxes/2025/
+├── eyethena/                                     # Eyethena projects
+├── growthscience/                                # Growth Science projects
+├── cfokit/                                       # CFOKit projects
+├── kindness-flywheel/                            # Kindness Flywheel projects
+└── .state/                                       # Working directory state (gitignored)
+    └── channel-contexts.json
+```
 
-- **Single clone** — all projects in one place
-- **Unified history** — see all work together
-- **No per-project overhead** — no separate GitHub repo per project
-- **Easy search** — grep across all projects at once
-- **Simpler management** — one git repo to push/pull
+Each project folder has:
+```
+[project-name]/
+├── README.md                  # Project description
+├── docs/                      # Raw input files
+├── drafts/                    # Working documents
+└── final/                     # Completed deliverables
+```
+
+## Workflow Example
+
+You're in **#personal-projects** channel:
+
+```bash
+# Set context once
+project-context cd personal/taxes/2025
+
+# Create projects under that context
+project-context create taxes-2026 "2026 tax return"
+# Creates: personal/taxes/2025/taxes-2026/
+
+project-context create deductions-summary "Summary of charitable deductions"
+# Creates: personal/taxes/2025/deductions-summary/
+
+# Check where you are
+project-context pwd
+# → personal/taxes/2025
+
+# Switch contexts when moving to a new area
+project-context cd personal/legal
+project-context create divorce-settlement "Divorce settlement documents"
+# Creates: personal/legal/divorce-settlement/
+```
+
+In a **different channel** (#saranam):
+
+```bash
+project-context cd saranam
+project-context create governance "Board governance docs"
+# Creates: saranam/governance/
+```
 
 ## Technical Details
 
-**Storage:** `~/.openclaw/project-context/` (monorepo root)
+**Storage:** `~/.openclaw/project-context/` (git monorepo)
+
+**State:** `~/.openclaw/project-context/.state/channel-contexts.json` (gitignored)
 
 **Git Config:**
 - User: `ananda-bot`
@@ -82,26 +149,16 @@ Shows project path, recent git history, and file listing.
 
 **Requirements:**
 - Git (required)
+- jq (required for JSON state management)
 - Bash
 
-**No external dependencies:** Uses standard tools
+## How It Works
 
-## Implementation Notes
-
-- Minimal by design — bash wrapper around git
-- All projects share one git monorepo
-- Folder structure keeps projects logically separate
-- Designed to iterate and grow based on usage
-
-## Future Enhancements
-
-- Auto-commit with better commit messages
-- List files in a project
-- Extract text from PDFs, parse Excel/CSV/Word
-- Project status/metadata tracking
-- Archive/cleanup old projects
-- Optional: push monorepo to GitHub for backup
-- Integration with completion skill for project-based tasks
+1. **Channel state:** Each Discord channel stores its working directory in `.state/channel-contexts.json`
+2. **Default behavior:** `create` uses current working directory if set
+3. **Override:** Provide explicit path to create anywhere
+4. **Commits:** Every new project is committed to monorepo with `git add && git commit`
+5. **Organization:** Projects grouped by context folder, so you can see all related work together
 
 ## Development
 
@@ -111,14 +168,27 @@ Main script: `project-context.sh`
 
 To test locally:
 ```bash
+# Set channel ID and test
+export OPENCLAW_CHANNEL_ID="test-channel"
+./project-context.sh cd personal/taxes/2025
 ./project-context.sh create test-project "Test project"
+./project-context.sh pwd
 ./project-context.sh list
-./project-context.sh info test-project
+./project-context.sh info personal/taxes/2025/test-project
 ```
 
-Clean up test projects:
+Clean up:
 ```bash
-rm -rf ~/.openclaw/project-context/test-project/
+cd ~/.openclaw/project-context
+git log --oneline | head  # See what you created
+git reset --hard HEAD~N   # Undo N commits if needed
 ```
 
-(Note: This removes from monorepo; you'd need to commit the deletion to git)
+## Future Enhancements
+
+- Auto-commit with smarter messages
+- Extract text from PDFs/Word/Excel
+- Project status tracking
+- Archive/cleanup workflows
+- Push monorepo to GitHub for backup
+- Integration with completion skill

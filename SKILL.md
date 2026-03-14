@@ -1,107 +1,144 @@
 # project-context
 
-**Status:** MVP (monorepo edition)
+**Status:** Working directory edition — channel-aware project management
 
 ## What It Does
 
-Creates focused project workspaces for discrete deliverables, all tracked in a single git monorepo at `~/.openclaw/project-context/`. Each new project gets:
-- A dedicated folder with README and project description
-- Subdirectories for docs, drafts, and final outputs
-- Automatic commit to the projects monorepo
+Manages project workspaces organized by organizational context (oneeleven, saranam, personal, etc.) in a unified monorepo at `~/.openclaw/project-context/`. 
+
+Each Discord channel has its own **working directory**, so you can:
+- Set a context once (e.g., `personal/taxes/2025`)
+- Create multiple projects under that context without repeating the path
+- Switch contexts when you move to a different project area
 
 ## When to Use
 
-- **Starting new work:** Tax return, legal filing, report, case analysis, research project, document collaboration
-- **Organizing around outcomes:** "I need to deliver X by Y date"
-- **Scoping context:** All files for this project in one place, git-tracked
-- **Viewing all projects together:** Everything in one monorepo, easy to search and reference across projects
+- **Starting new work:** Project, task, document, analysis within an organizational area
+- **Organizing by context:** All work for a context in one place
+- **Channel-based workflows:** Work on taxes in #personal-projects, governance in #saranam, etc.
 
 ## Usage
 
-### Start a New Project
+### Set Your Working Directory
 ```
-project-context create [project-name] "[description]"
-```
-
-**Example:**
-```
-project-context create divorce-settlement "Work through divorce settlement. Legal docs, spreadsheets, negotiation notes."
+/project-context cd personal/taxes/2025
 ```
 
-**What happens:**
-1. Creates `~/.openclaw/project-context/[project-name]/`
-2. Creates README.md with project context
-3. Creates subdirectories: `docs/`, `drafts/`, `final/`
-4. Commits the new project to the monorepo
+Sets the working directory for the current Discord channel. You only do this once per channel.
+
+### Show Current Working Directory
+```
+/project-context pwd
+```
+
+Shows where you are in the project structure for this channel.
+
+### Create a Project
+```
+/project-context create taxes-2026 "Prepare 2026 tax return"
+```
+
+Creates a project in your current working directory. If no working directory is set, you'll get an error asking you to set one first.
+
+**Or specify the path explicitly:**
+```
+/project-context create saranam/governance "Board governance framework"
+```
 
 ### List All Projects
 ```
-project-context list
+/project-context list
 ```
+
+Shows all projects in the monorepo and file counts.
 
 ### View Project Details
 ```
-project-context info [project-name]
+/project-context info personal/taxes/2025/taxes-2026
 ```
 
 Shows project path, recent git history, and files.
 
-### Day-to-Day Workflow
+## Directory Structure
 
-When you mention a project by name:
-1. I treat that project folder as the working directory
-2. Upload files to `docs/`, `drafts/`, or `final/`
-3. I commit changes to the monorepo
-4. All projects are visible together in git history
-
-## Structure
+The monorepo is organized by organizational context:
 
 ```
-~/.openclaw/project-context/   # Monorepo root
-├── [project-name-1]/
-│   ├── README.md              # Project description
-│   ├── docs/                  # Raw input files
-│   ├── drafts/                # Working documents
-│   └── final/                 # Completed deliverables
-├── [project-name-2]/
-└── .git/                       # Unified monorepo history
+~/.openclaw/project-context/
+├── oneeleven/                 (OneEleven projects)
+├── saranam/                   (Saranam board projects)
+├── personal/                  (Personal projects)
+│   ├── taxes/
+│   │   └── 2025/
+│   │       ├── growthscience/ (Growth Science taxes)
+│   │       └── personal/      (Personal taxes)
+├── simny/                     (SIMNY projects)
+│   └── taxes/
+│       └── 2025/
+├── eyethena/                  (Eyethena projects)
+├── growthscience/             (Growth Science business projects)
+├── cfokit/                    (CFOKit projects)
+├── kindness-flywheel/         (Kindness Flywheel content)
+└── .state/                    (Channel context state, gitignored)
+    └── channel-contexts.json
 ```
+
+## Workflow Example
+
+**Channel: #personal-projects**
+```
+User: /project-context cd personal/taxes/2025
+Bot: ✓ Working directory: personal/taxes/2025
+
+User: /project-context create taxes-2026 "Annual 2026 tax filing"
+Bot: ✓ Project created: personal/taxes/2025/taxes-2026
+
+User: (uploads documents, creates drafts, iterates)
+
+User: /project-context pwd
+Bot: Working directory: personal/taxes/2025
+```
+
+**Channel: #saranam**
+```
+User: /project-context cd saranam
+Bot: ✓ Working directory: saranam
+
+User: /project-context create governance-framework "Board governance docs"
+Bot: ✓ Project created: saranam/governance-framework
+
+User: (works on governance)
+```
+
+## How It Works
+
+- **Channel-based state:** Each Discord channel remembers its working directory
+- **Monorepo commits:** Every project creation is a git commit to the shared monorepo
+- **Optional paths:** Use explicit paths if you need to create outside your working directory
+- **Gitignored state:** Channel contexts stored in `.state/channel-contexts.json` (not committed)
 
 ## What You Need
 
 - OpenClaw agent with file access
-- Git (usually already available)
-- No GitHub account required (local git works fine)
+- Git (usually pre-installed)
 
 ## Implementation
 
 **Core logic:**
 - Bash script that:
-  - Creates project folder hierarchy
-  - Generates templated README
-  - Commits to the parent monorepo
+  - Manages per-channel working directories in `.state/channel-contexts.json`
+  - Creates project folders with docs/drafts/final structure
+  - Commits new projects to monorepo
   
 **Data location:** `~/.openclaw/project-context/` (monorepo)
 
-**Dependencies:** Standard tools (bash, git)
-
-## Benefits of Monorepo
-
-- **Single clone** → all projects available
-- **Unified history** → easy to see all work across projects
-- **No per-project overhead** → no GitHub repo creation per project
-- **Easy search** → grep across all projects at once
-- **Simple backup** → one git repo to push/pull
-
-## Known Limitations
-
-- GitHub integration not automatic (can push monorepo manually if needed)
-- Projects share a single git history (but folder structure keeps them logically separate)
+**Dependencies:** Standard tools (bash, git, jq)
 
 ## Future Iterations
 
-- Auto-commit with context-aware messages
-- Extract text from PDFs, parse Excel/CSV/Word
+- Auto-commit with better messages
+- Extract text from PDFs/Word
 - Project status/metadata tracking
 - Archive/cleanup old projects
 - Optional: push monorepo to GitHub for backup
+- Integration with completion skill for project tasks
