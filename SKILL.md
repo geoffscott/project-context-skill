@@ -3,8 +3,9 @@ name: project-context
 description: >
   Organize project workspaces by context with channel-aware working directories.
   Prevents context window flooding by partitioning work into separate, manageable
-  folders. Each Discord channel can set its own working directory (like cd), so you
-  can work deeply on one project without dragging other contexts in.
+  folders. Each channel can set its own working directory (like cd), so you
+  can work deeply on one project without dragging other contexts in. Works with
+  any OpenClaw-supported chat platform (Discord, Slack, etc.).
 ---
 
 # project-context
@@ -15,10 +16,10 @@ description: >
 
 Organizes project workspaces by context in a shared repository at `~/.openclaw/project-context/`. 
 
-Each Discord channel has its own **working directory**, so you can:
+Each channel has its own **working directory**, so you can:
 - Set a context once (e.g., `work/active-project`)
 - Create multiple projects under that context without repeating the path
-- Switch contexts when you move to a different area (channel = context)
+- Switch contexts when you move to a different channel or area
 
 ## When to Use
 
@@ -26,47 +27,30 @@ Each Discord channel has its own **working directory**, so you can:
 - **Organizing by domain:** Keep work/research/personal separate so they don't mix
 - **Channel-based workflows:** Set context once per channel, work without context bleed
 
-## Usage
+## How to Use
 
-### Set Your Working Directory
-```
-/project-context cd work/active-project
-```
+Invoke this skill by describing what you want to do in natural language. Examples:
 
-Sets the working directory for the current Discord channel. You only do this once per channel.
+**Set your project context:**
+- "Set my project context to work/active-project"
+- "I'm working on research/long-term stuff"
+- "Switch context to documentation"
 
-### Show Current Working Directory
-```
-/project-context pwd
-```
+**Create a project:**
+- "Create a new project called feature-analysis for researching and documenting the new feature"
+- "Create a project in my current context called bug-investigation"
 
-Shows where you are in the project structure for this channel.
+**View your context:**
+- "What's my current project context?"
+- "Where am I right now?"
 
-### Create a Project
-```
-/project-context create research "Document findings and research notes"
-```
+**List projects:**
+- "Show me all projects in the monorepo"
+- "What projects do I have?"
 
-Creates a project in your current working directory. If no working directory is set, you'll get an error asking you to set one first.
-
-**Or specify the path explicitly:**
-```
-/project-context create documentation/guide "User guide for feature X"
-```
-
-### List All Projects
-```
-/project-context list
-```
-
-Shows all projects in the repository and file counts.
-
-### View Project Details
-```
-/project-context info work/active-project/research
-```
-
-Shows project path, recent git history, and files.
+**Get project details:**
+- "Tell me about work/active-project/research"
+- "What's in the personal/taxes/2025 project?"
 
 ## Directory Structure
 
@@ -85,37 +69,40 @@ The repository is organized by context folders:
 
 ## Workflow Example
 
-**Channel: #work**
+When working on work-related projects:
 ```
-User: /project-context cd work/active-sprint
-Bot: ✓ Working directory: work/active-sprint
+User: Set my project context to work/active-sprint
+Agent: ✓ Working directory: work/active-sprint
 
-User: /project-context create feature-analysis "Research and document feature"
-Bot: ✓ Project created: work/active-sprint/feature-analysis
+User: Create a new project called feature-analysis for research and documentation
+Agent: ✓ Project created: work/active-sprint/feature-analysis
 
 User: (uploads documents, creates drafts, iterates)
 
-User: /project-context pwd
-Bot: Working directory: work/active-sprint
+User: What's my current project context?
+Agent: Working directory: work/active-sprint
 ```
 
-**Channel: #research**
+When switching to research:
 ```
-User: /project-context cd research/long-term
-Bot: ✓ Working directory: research/long-term
+User: Switch context to research/long-term
+Agent: ✓ Working directory: research/long-term
 
-User: /project-context create exploration "Technical exploration"
-Bot: ✓ Project created: research/long-term/exploration
+User: Create a project called exploration for technical exploration
+Agent: ✓ Project created: research/long-term/exploration
 
 User: (works on research)
 ```
 
+Each channel remembers its context independently, across platforms.
+
 ## How It Works
 
-- **Channel-based state:** Each Discord channel remembers its working directory
-- **Monorepo commits:** Every project creation is a git commit to the shared monorepo
-- **Optional paths:** Use explicit paths if you need to create outside your working directory
+- **Channel-based state:** Each channel (Discord, Slack, etc.) remembers its working directory independently
+- **Monorepo commits:** Every project creation is a git commit to the shared repository
+- **Optional paths:** Specify a full path to create outside your working directory without changing context
 - **Gitignored state:** Channel contexts stored in `.state/channel-contexts.json` (not committed)
+- **Platform-agnostic:** Works with any OpenClaw-supported chat platform
 
 ## What You Need
 
@@ -137,7 +124,7 @@ User: (works on research)
 ## Future Iterations
 
 - Auto-commit with better messages
-- Extract text from PDFs/Word
+- Extract text from PDFs/Word (context-optimizer feature)
 - Project status/metadata tracking
 - Archive/cleanup old projects
 - Optional: push monorepo to GitHub for backup

@@ -2,79 +2,51 @@
 
 **Why you need this:** Large projects generate massive context. If you're juggling work across multiple domains, loading everything together floods your context window and dilutes focus. This skill organizes your work into separate contexts so you can work deeply on one thing without dragging everything else in.
 
-**How it works:** Projects live in organized folders on disk. Beyond traditional file system boundaries, we've added channel awareness — each Discord channel can have its own project context (like setting a working directory). Switch channels, switch contexts. No mental overhead, no accidental context bleed.
+**How it works:** Projects live in organized folders on disk. Beyond traditional file system boundaries, we've added channel awareness — each channel (Discord, Slack, etc.) can have its own project context (like setting a working directory). Switch channels, switch contexts. No mental overhead, no accidental context bleed.
 
-## Quick Start
+## Using This Skill
 
-**Step 1: Set your working directory** (once per channel)
-```bash
-project-context cd work/active-project
-```
+Invoke this skill by describing what you want to do in natural language. The agent will understand your intent and execute the appropriate action.
 
-**Step 2: Create projects** (stays in your working directory)
-```bash
-project-context create research "Document findings and analysis"
-```
+### Set Your Project Context
 
-This creates:
-- Folder: `~/.openclaw/project-context/work/active-project/research/`
-- README with context
-- Subdirectories: `docs/`, `drafts/`, `final/`
-- Automatic commit to shared project repository
-- Stays in `work/active-project/` context for next project
+Say something like:
+- "Set my project context to work/active-project"
+- "I'm working on research/long-term stuff"
+- "Switch context to documentation"
 
-## Commands
-
-### Set Working Directory
-```bash
-project-context cd <path>
-```
-
-Sets the working directory for the current Discord channel. Example:
-```bash
-project-context cd personal/taxes/2025
-project-context cd saranam
-project-context cd oneeleven/products
-```
-
-### Show Working Directory
-```bash
-project-context pwd
-```
-
-Shows where you are for the current channel.
+This sets the working directory for your current channel.
 
 ### Create a Project
-```bash
-project-context create "<description>"
-```
 
-Creates a project in the current working directory. Example:
-```bash
-project-context create "2026 tax return filing"
-```
+Say something like:
+- "Create a new project called feature-analysis for researching and documenting the new feature"
+- "Create a project in my current context called bug-investigation"
 
-**Or create elsewhere** (without changing context):
-```bash
-project-context create saranam/governance "Board governance framework"
-```
+Projects are created in your current working directory by default.
 
-### List All Projects
-```bash
-project-context list
-```
+### View Your Context
 
-Shows all projects in the monorepo.
+Say something like:
+- "What's my current project context?"
+- "Where am I right now?"
 
-### Project Info
-```bash
-project-context info <path>
-```
+The agent will show your working directory for this channel.
 
-Shows path, git history, and files. Example:
-```bash
-project-context info personal/taxes/2025/taxes-2026
-```
+### List Projects
+
+Say something like:
+- "Show me all projects in the monorepo"
+- "What projects do I have?"
+- "List everything"
+
+### Get Project Details
+
+Say something like:
+- "Tell me about work/active-project/research"
+- "What's in the personal/taxes/2025 project?"
+
+The agent will show you the path, recent git history, and files.
 
 ## Directory Structure
 
@@ -103,59 +75,58 @@ Each project folder has:
 
 ## Workflow Example
 
-You're in **#work** channel:
+When working on work-related projects:
 
-```bash
-# Set context once
-project-context cd work/current-sprint
+```
+User: Set my project context to work/current-sprint
+Agent: ✓ Working directory: work/current-sprint
 
-# Create projects under that context
-project-context create feature-analysis "Research and document new feature"
-# Creates: work/current-sprint/feature-analysis/
+User: Create a new project called feature-analysis for researching and documenting the new feature
+Agent: ✓ Project created: work/current-sprint/feature-analysis
 
-project-context create bug-investigation "Investigate reported bug"
-# Creates: work/current-sprint/bug-investigation/
+User: (uploads documents, creates drafts, iterates)
 
-# Check where you are
-project-context pwd
-# → work/current-sprint
-
-# Switch contexts when moving to a new area
-project-context cd research/long-term
-project-context create exploration "Technical exploration"
-# Creates: research/long-term/exploration/
+User: What's my current project context?
+Agent: Working directory: work/current-sprint
 ```
 
-In a **different channel** (#documentation):
+When switching to a different area:
 
-```bash
-project-context cd documentation
-project-context create api-guide "API reference guide"
-# Creates: documentation/api-guide/
 ```
+User: Switch context to research/long-term
+Agent: ✓ Working directory: research/long-term
+
+User: Create a project called exploration for technical exploration
+Agent: ✓ Project created: research/long-term/exploration
+```
+
+Each channel remembers its working directory independently, across platforms.
 
 ## Technical Details
 
 **Storage:** `~/.openclaw/project-context/` (git monorepo)
 
-**State:** `~/.openclaw/project-context/.state/channel-contexts.json` (gitignored)
-
-**Git Config:**
-- User: `ananda-bot`
-- Email: `ananda@growthscience.co`
+**State:** `~/.openclaw/project-context/.state/channel-contexts.json` (gitignored, per-channel working directories)
 
 **Requirements:**
-- Git (required)
+- Git (required for commits and history)
 - jq (required for JSON state management)
 - Bash
 
+**Git commits** are authored by the agent running the skill. Configure git user info on the host if you want to customize commit authorship.
+
+## Platform Support
+
+This skill works with any OpenClaw-supported chat platform (Discord, Slack, etc.). Each platform's channels are treated identically — they each get their own working directory stored by channel ID. Switch between Discord and Slack, and each maintains its own context.
+
 ## How It Works
 
-1. **Channel state:** Each Discord channel stores its working directory in `.state/channel-contexts.json`
-2. **Default behavior:** `create` uses current working directory if set
-3. **Override:** Provide explicit path to create anywhere
+1. **Channel-aware state:** Each channel stores its working directory in `.state/channel-contexts.json` (keyed by channel ID)
+2. **Default behavior:** Projects are created in the current working directory if set
+3. **Override:** Specify a full path to create anywhere without changing channel context
 4. **Commits:** Every new project is committed to monorepo with `git add && git commit`
 5. **Organization:** Projects grouped by context folder, so you can see all related work together
+6. **Platform-agnostic:** The skill doesn't care which platform — it just uses the channel ID it receives
 
 ## Development
 
@@ -167,11 +138,11 @@ To test locally:
 ```bash
 # Set channel ID and test
 export OPENCLAW_CHANNEL_ID="test-channel"
-./project-context.sh cd personal/taxes/2025
+./project-context.sh cd work/active-project
 ./project-context.sh create test-project "Test project"
 ./project-context.sh pwd
 ./project-context.sh list
-./project-context.sh info personal/taxes/2025/test-project
+./project-context.sh info work/active-project/test-project
 ```
 
 Clean up:
@@ -184,8 +155,8 @@ git reset --hard HEAD~N   # Undo N commits if needed
 ## Future Enhancements
 
 - Auto-commit with smarter messages
-- Extract text from PDFs/Word/Excel
+- Extract text from PDFs/Word/Excel (context-optimizer feature)
 - Project status tracking
 - Archive/cleanup workflows
 - Push monorepo to GitHub for backup
-- Integration with completion skill
+- Integration with completion skill for project-based tasks
