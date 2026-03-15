@@ -1,19 +1,10 @@
 ---
 name: project-context
 description: >
-  Manage project workspaces in a shared monorepo organized by organizational context
-  (oneeleven, saranam, personal, simny, etc.) with channel-aware working directories.
-  Use when starting new projects, organizing work by context, or switching between
-  project areas in different Discord channels.
----
-
----
-name: project-context
-description: >
-  Manage project workspaces in a shared monorepo organized by organizational context
-  (oneeleven, saranam, personal, simny, etc.) with channel-aware working directories.
-  Use when starting new projects, organizing work by context, or switching between
-  project areas in different Discord channels.
+  Organize project workspaces by context with channel-aware working directories.
+  Prevents context window flooding by partitioning work into separate, manageable
+  folders. Each Discord channel can set its own working directory (like cd), so you
+  can work deeply on one project without dragging other contexts in.
 ---
 
 # project-context
@@ -22,24 +13,24 @@ description: >
 
 ## What It Does
 
-Manages project workspaces organized by organizational context (oneeleven, saranam, personal, etc.) in a unified monorepo at `~/.openclaw/project-context/`. 
+Organizes project workspaces by context in a shared repository at `~/.openclaw/project-context/`. 
 
 Each Discord channel has its own **working directory**, so you can:
-- Set a context once (e.g., `personal/taxes/2025`)
+- Set a context once (e.g., `work/active-project`)
 - Create multiple projects under that context without repeating the path
-- Switch contexts when you move to a different project area
+- Switch contexts when you move to a different area (channel = context)
 
 ## When to Use
 
-- **Starting new work:** Project, task, document, analysis within an organizational area
-- **Organizing by context:** All work for a context in one place
-- **Channel-based workflows:** Work on taxes in #personal-projects, governance in #saranam, etc.
+- **Starting new work:** Create a project for any deliverable, task, or analysis
+- **Organizing by domain:** Keep work/research/personal separate so they don't mix
+- **Channel-based workflows:** Set context once per channel, work without context bleed
 
 ## Usage
 
 ### Set Your Working Directory
 ```
-/project-context cd personal/taxes/2025
+/project-context cd work/active-project
 ```
 
 Sets the working directory for the current Discord channel. You only do this once per channel.
@@ -53,14 +44,14 @@ Shows where you are in the project structure for this channel.
 
 ### Create a Project
 ```
-/project-context create taxes-2026 "Prepare 2026 tax return"
+/project-context create research "Document findings and research notes"
 ```
 
 Creates a project in your current working directory. If no working directory is set, you'll get an error asking you to set one first.
 
 **Or specify the path explicitly:**
 ```
-/project-context create saranam/governance "Board governance framework"
+/project-context create documentation/guide "User guide for feature X"
 ```
 
 ### List All Projects
@@ -68,64 +59,55 @@ Creates a project in your current working directory. If no working directory is 
 /project-context list
 ```
 
-Shows all projects in the monorepo and file counts.
+Shows all projects in the repository and file counts.
 
 ### View Project Details
 ```
-/project-context info personal/taxes/2025/taxes-2026
+/project-context info work/active-project/research
 ```
 
 Shows project path, recent git history, and files.
 
 ## Directory Structure
 
-The monorepo is organized by organizational context:
+The repository is organized by context folders:
 
 ```
 ~/.openclaw/project-context/
-├── oneeleven/                 (OneEleven projects)
-├── saranam/                   (Saranam board projects)
+├── work/                      (Work-related projects)
+├── research/                  (Research projects)
+├── documentation/             (Documentation projects)
 ├── personal/                  (Personal projects)
-│   ├── taxes/
-│   │   └── 2025/
-│   │       ├── growthscience/ (Growth Science taxes)
-│   │       └── personal/      (Personal taxes)
-├── simny/                     (SIMNY projects)
-│   └── taxes/
-│       └── 2025/
-├── eyethena/                  (Eyethena projects)
-├── growthscience/             (Growth Science business projects)
-├── cfokit/                    (CFOKit projects)
-├── kindness-flywheel/         (Kindness Flywheel content)
+├── archive/                   (Completed/archived work)
 └── .state/                    (Channel context state, gitignored)
     └── channel-contexts.json
 ```
 
 ## Workflow Example
 
-**Channel: #personal-projects**
+**Channel: #work**
 ```
-User: /project-context cd personal/taxes/2025
-Bot: ✓ Working directory: personal/taxes/2025
+User: /project-context cd work/active-sprint
+Bot: ✓ Working directory: work/active-sprint
 
-User: /project-context create taxes-2026 "Annual 2026 tax filing"
-Bot: ✓ Project created: personal/taxes/2025/taxes-2026
+User: /project-context create feature-analysis "Research and document feature"
+Bot: ✓ Project created: work/active-sprint/feature-analysis
 
 User: (uploads documents, creates drafts, iterates)
 
 User: /project-context pwd
-Bot: Working directory: personal/taxes/2025
+Bot: Working directory: work/active-sprint
 ```
 
-**Channel: #saranam**
+**Channel: #research**
 ```
-User: /project-context cd saranam
-Bot: ✓ Working directory: saranam
+User: /project-context cd research/long-term
+Bot: ✓ Working directory: research/long-term
 
-User: /project-context create governance-framework "Board governance docs"
-Bot: ✓ Project created: saranam/governance-framework
+User: /project-context create exploration "Technical exploration"
+Bot: ✓ Project created: research/long-term/exploration
 
-User: (works on governance)
+User: (works on research)
 ```
 
 ## How It Works
