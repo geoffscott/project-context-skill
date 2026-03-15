@@ -36,7 +36,7 @@ The agent will show your working directory for this channel.
 ### List Projects
 
 Say something like:
-- "Show me all projects in the monorepo"
+- "Show me all projects in the repository"
 - "What projects do I have?"
 - "List everything"
 
@@ -158,5 +158,5 @@ git reset --hard HEAD~N   # Undo N commits if needed
 - Extract text from PDFs/Word/Excel (context-optimizer feature)
 - Project status tracking
 - Archive/cleanup workflows
-- Push monorepo to GitHub for backup
+- Push repository to GitHub for backup
 - Integration with completion skill for project-based tasks

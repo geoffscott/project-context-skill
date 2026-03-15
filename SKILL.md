@@ -45,7 +45,7 @@ Invoke this skill by describing what you want to do in natural language. Example
 - "Where am I right now?"
 
 **List projects:**
-- "Show me all projects in the monorepo"
+- "Show me all projects in the repository"
 - "What projects do I have?"
 
 **Get project details:**
@@ -115,9 +115,9 @@ Each channel remembers its context independently, across platforms.
 - Bash script that:
   - Manages per-channel working directories in `.state/channel-contexts.json`
   - Creates project folders with docs/drafts/final structure
-  - Commits new projects to monorepo
+  - Commits new projects to the repository
   
-**Data location:** `~/.openclaw/project-context/` (monorepo)
+**Data location:** `~/.openclaw/project-context/` (shared repository)
 
 **Dependencies:** Standard tools (bash, git, jq)
 
@@ -127,5 +127,5 @@ Each channel remembers its context independently, across platforms.
 - Extract text from PDFs/Word (context-optimizer feature)
 - Project status/metadata tracking
 - Archive/cleanup old projects
-- Optional: push monorepo to GitHub for backup
+- Optional: push repository to GitHub for backup
 - Integration with completion skill for project tasks
