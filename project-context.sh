@@ -242,14 +242,27 @@ EOF
   # Create initial subdirectories
   mkdir -p "${full_path}/docs" "${full_path}/drafts" "${full_path}/final"
 
-  # Commit to monorepo
-  echo -e "${BLUE}Committing to monorepo...${NC}"
+  # Commit to repository
+  echo -e "${BLUE}Committing to repository...${NC}"
   cd "$PROJECTS_DIR"
   git add "${project_path}/"
   git commit -m "feat: create project ${project_path}"
 
-  echo -e "${GREEN}✓ Project created: ${project_path}${NC}"
-  echo -e "${GREEN}✓ Committed to monorepo${NC}"
+  # Push to GitHub
+  if git remote get-url origin &>/dev/null; then
+    echo -e "${BLUE}Pushing to GitHub...${NC}"
+    if git push origin main 2>/dev/null; then
+      echo -e "${GREEN}✓ Project created: ${project_path}${NC}"
+      echo -e "${GREEN}✓ Committed and pushed to GitHub${NC}"
+    else
+      echo -e "${GREEN}✓ Project created: ${project_path}${NC}"
+      echo -e "${GREEN}✓ Committed to repository${NC}"
+      echo -e "${YELLOW}⚠ Push to GitHub failed (may need manual push)${NC}"
+    fi
+  else
+    echo -e "${GREEN}✓ Project created: ${project_path}${NC}"
+    echo -e "${GREEN}✓ Committed to repository${NC}"
+  fi
 }
 
 ###############################################################################
@@ -269,7 +282,7 @@ list_projects() {
     return
   fi
 
-  echo -e "${BLUE}Projects in monorepo:${NC}"
+  echo -e "${BLUE}Projects in repository:${NC}"
   for proj_path in "${projects[@]}"; do
     # Get relative path
     local rel_path="${proj_path#$PROJECTS_DIR/}"
@@ -311,7 +324,7 @@ project_info() {
   echo "Path: ${full_path}"
   echo ""
 
-  # Git info (from monorepo)
+  # Git info (from repository)
   echo -e "${BLUE}Git History:${NC}"
   cd "$PROJECTS_DIR"
   git log --oneline -- "$path" | head -5 || echo "  (no commits yet)"
