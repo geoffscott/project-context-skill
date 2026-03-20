@@ -52,6 +52,23 @@ Invoke this skill by describing what you want to do in natural language. Example
 - "Tell me about work/active-project/research"
 - "What's in the personal/taxes/2025 project?"
 
+**Back up your projects:**
+- "Push my projects to GitHub"
+- "Back up my project changes"
+
+Commits any uncommitted changes and pushes them to GitHub for backup.
+
+## Daily Automatic Backups
+
+Set up a cron job for daily backups:
+
+```bash
+crontab -e
+# Add: 0 2 * * * cd ~/.openclaw/project-context && git push origin main
+```
+
+This pushes to GitHub automatically every day at 2 AM. Or ask the agent to "Back up my projects" for an on-demand push.
+
 ## Directory Structure
 
 The repository is organized by context folders:

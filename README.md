@@ -48,6 +48,14 @@ Say something like:
 
 The agent will show you the path, recent git history, and files.
 
+### Back Up Your Projects
+
+Say something like:
+- "Push my projects to GitHub"
+- "Back up my project changes"
+
+This will commit any uncommitted changes and push them to GitHub as a backup.
+
 ## Directory Structure
 
 ```
@@ -152,11 +160,24 @@ git log --oneline | head  # See what you created
 git reset --hard HEAD~N   # Undo N commits if needed
 ```
 
+## Automatic Daily Backups
+
+To ensure your projects are backed up daily, set up a cron job:
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add this line to run daily at 2 AM:
+0 2 * * * cd ~/.openclaw/project-context && git push origin main > /dev/null 2>&1
+```
+
+This will automatically push any local changes to GitHub every day. You can also trigger a manual backup anytime by asking the agent to "Push my projects to GitHub" or "Back up my changes".
+
 ## Future Enhancements
 
 - Auto-commit with smarter messages
 - Extract text from PDFs/Word/Excel (context-optimizer feature)
 - Project status tracking
 - Archive/cleanup workflows
-- Push repository to GitHub for backup
 - Integration with completion skill for project-based tasks

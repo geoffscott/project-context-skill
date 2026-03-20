@@ -93,19 +93,24 @@ Commands:
   pwd                              Show current working directory
   list                             List all projects
   info <path>                      Show project info
+  push                             Push all local changes to GitHub
   help                             Show this help
 
 Working Directory:
   Each channel has its own working directory. Use 'cd' to set it.
   When you 'create' without a path, it creates in the current working directory.
 
+Backup:
+  Use 'push' to manually back up any local changes to GitHub.
+  Or set up a cron job to push daily:
+    0 2 * * * cd ~/.openclaw/project-context && git push origin main
+
 Examples:
   /project-context cd personal/taxes/2025
   /project-context create taxes-2026 "Prepare 2026 tax return"
-  /project-context cd simny/taxes/2025
   /project-context pwd
+  /project-context push
   /project-context list
-  /project-context info simny/taxes/2025
 
 EOF
 }
@@ -336,6 +341,40 @@ project_info() {
 }
 
 ###############################################################################
+# Push Changes to GitHub
+###############################################################################
+
+push_changes() {
+  if [[ ! -d "$PROJECTS_DIR/.git" ]]; then
+    echo -e "${RED}Error: Not a git repository${NC}"
+    return 1
+  fi
+
+  cd "$PROJECTS_DIR"
+  
+  # Check if there are changes to commit
+  if git status --porcelain | grep -q .; then
+    echo -e "${BLUE}Staging and committing changes...${NC}"
+    git add -A
+    git commit -m "chore: backup uncommitted changes"
+  fi
+
+  # Push to GitHub
+  if git remote get-url origin &>/dev/null; then
+    echo -e "${BLUE}Pushing to GitHub...${NC}"
+    if git push origin main 2>&1; then
+      echo -e "${GREEN}✓ All changes pushed to GitHub${NC}"
+    else
+      echo -e "${YELLOW}⚠ Push to GitHub failed${NC}"
+      return 1
+    fi
+  else
+    echo -e "${YELLOW}⚠ No GitHub remote configured${NC}"
+    return 1
+  fi
+}
+
+###############################################################################
 # Main
 ###############################################################################
 
@@ -360,6 +399,9 @@ main() {
       ;;
     info)
       project_info "$2"
+      ;;
+    push)
+      push_changes
       ;;
     help|--help|-h|"")
       show_usage
